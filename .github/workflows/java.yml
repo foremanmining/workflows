@@ -9,6 +9,9 @@ on:
       gcs-bucket:
         required: true
         type: string
+      java:
+        required: true
+        type: number
 
 jobs:
   build:
@@ -17,7 +20,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v3
         with:
-          java-version: 8
+          java-version: ${{ inputs.java }}
           distribution: temurin
       - uses: google-github-actions/auth@v1
         with:
