@@ -45,9 +45,9 @@ jobs:
         with:
           name: builds
           path: |
-            ${{ inputs.result-folder || 'foreman-pickaxe' }}/target/*.tar.bz2
-            ${{ inputs.result-folder || 'foreman-pickaxe' }}/target/*.tar.gz
-            ${{ inputs.result-folder || 'foreman-pickaxe' }}/target/*.zip
+            ${{ inputs.result-folder }}/target/*.tar.bz2
+            ${{ inputs.result-folder }}/target/*.tar.gz
+            ${{ inputs.result-folder }}/target/*.zip
 
   deploy-artifact-registry:
     if: startsWith(github.ref, 'refs/tags/')
@@ -79,7 +79,7 @@ jobs:
       - uses: google-github-actions/upload-cloud-storage@v1
         with:
           path: builds
-          destination: ${{ inputs.gcs-bucket || 'pickaxe-releases' }}
+          destination: ${{ inputs.gcs-bucket }}
           parent: false
 
   publish-release:
