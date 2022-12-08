@@ -1,9 +1,6 @@
 name: primary
 
 on:
-  push:
-    branches:
-      - '*'
   workflow_call:
     inputs:
       result-folder:
