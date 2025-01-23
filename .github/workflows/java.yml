@@ -41,7 +41,7 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_ARTIFACT_REGISTRY_SERVICE_ACCOUNT }}
       - run: mvn verify --settings .m2_settings.xml -q
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: builds
           path: |
