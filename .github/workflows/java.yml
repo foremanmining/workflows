@@ -81,6 +81,7 @@ jobs:
           path: builds
           destination: ${{ inputs.gcs-bucket }}
           parent: false
+          process_gcloudignore: false
 
   publish-release:
     if: startsWith(github.ref, 'refs/tags/')
