@@ -69,7 +69,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: builds
           path: builds
@@ -87,7 +87,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ deploy-artifact-registry, deploy-gcs ]
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: builds
           path: builds
