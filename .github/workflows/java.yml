@@ -13,6 +13,14 @@ on:
         required: true
         type: number
 
+# NOTE: the "Write shared Maven settings" step is intentionally duplicated in the
+# build / test / deploy-artifact-registry jobs (jobs run on separate runners and a
+# reusable workflow can't share steps). Keep the three copies identical. It writes
+# the canonical .m2_settings.xml so consuming repos no longer need their own:
+# resolution goes through the Artifact Registry virtual repo (cached Maven Central +
+# internal releases/snapshots), with Central left as the superpom fallthrough for the
+# early parent-POM phase before the artifactregistry:// wagon extension is loaded.
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -27,6 +35,35 @@ jobs:
       - uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_ARTIFACT_REGISTRY_SERVICE_ACCOUNT }}
+      - name: Write shared Maven settings
+        run: |
+          cat > .m2_settings.xml <<'SETTINGS'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd">
+            <profiles>
+              <profile>
+                <id>gcp</id>
+                <repositories>
+                  <repository>
+                    <id>gcp-virtual</id>
+                    <url>artifactregistry://us-maven.pkg.dev/foreman-production/maven-virtual</url>
+                    <releases><enabled>true</enabled></releases>
+                    <snapshots><enabled>true</enabled></snapshots>
+                  </repository>
+                </repositories>
+                <pluginRepositories>
+                  <pluginRepository>
+                    <id>gcp-virtual</id>
+                    <url>artifactregistry://us-maven.pkg.dev/foreman-production/maven-virtual</url>
+                    <releases><enabled>true</enabled></releases>
+                    <snapshots><enabled>true</enabled></snapshots>
+                  </pluginRepository>
+                </pluginRepositories>
+              </profile>
+            </profiles>
+            <activeProfiles><activeProfile>gcp</activeProfile></activeProfiles>
+          </settings>
+          SETTINGS
       - run: mvn install --settings .m2_settings.xml -DskipTests=true -Dassembly.skipAssembly=true -Dmaven.javadoc.skip=true -B -V -q -Dmaven.wagon.http.retryHandler.count=3 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dmaven.wagon.rto=60000
 
   test:
@@ -44,6 +81,35 @@ jobs:
       - uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_ARTIFACT_REGISTRY_SERVICE_ACCOUNT }}
+      - name: Write shared Maven settings
+        run: |
+          cat > .m2_settings.xml <<'SETTINGS'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd">
+            <profiles>
+              <profile>
+                <id>gcp</id>
+                <repositories>
+                  <repository>
+                    <id>gcp-virtual</id>
+                    <url>artifactregistry://us-maven.pkg.dev/foreman-production/maven-virtual</url>
+                    <releases><enabled>true</enabled></releases>
+                    <snapshots><enabled>true</enabled></snapshots>
+                  </repository>
+                </repositories>
+                <pluginRepositories>
+                  <pluginRepository>
+                    <id>gcp-virtual</id>
+                    <url>artifactregistry://us-maven.pkg.dev/foreman-production/maven-virtual</url>
+                    <releases><enabled>true</enabled></releases>
+                    <snapshots><enabled>true</enabled></snapshots>
+                  </pluginRepository>
+                </pluginRepositories>
+              </profile>
+            </profiles>
+            <activeProfiles><activeProfile>gcp</activeProfile></activeProfiles>
+          </settings>
+          SETTINGS
       - run: mvn verify --settings .m2_settings.xml -q -Dmaven.wagon.http.retryHandler.count=3 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dmaven.wagon.rto=60000
       - uses: actions/upload-artifact@v4
         with:
@@ -68,6 +134,35 @@ jobs:
       - uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_ARTIFACT_REGISTRY_SERVICE_ACCOUNT }}
+      - name: Write shared Maven settings
+        run: |
+          cat > .m2_settings.xml <<'SETTINGS'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd">
+            <profiles>
+              <profile>
+                <id>gcp</id>
+                <repositories>
+                  <repository>
+                    <id>gcp-virtual</id>
+                    <url>artifactregistry://us-maven.pkg.dev/foreman-production/maven-virtual</url>
+                    <releases><enabled>true</enabled></releases>
+                    <snapshots><enabled>true</enabled></snapshots>
+                  </repository>
+                </repositories>
+                <pluginRepositories>
+                  <pluginRepository>
+                    <id>gcp-virtual</id>
+                    <url>artifactregistry://us-maven.pkg.dev/foreman-production/maven-virtual</url>
+                    <releases><enabled>true</enabled></releases>
+                    <snapshots><enabled>true</enabled></snapshots>
+                  </pluginRepository>
+                </pluginRepositories>
+              </profile>
+            </profiles>
+            <activeProfiles><activeProfile>gcp</activeProfile></activeProfiles>
+          </settings>
+          SETTINGS
       - run: mvn deploy --settings .m2_settings.xml -DskipTests=true -q -Dmaven.wagon.http.retryHandler.count=3 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dmaven.wagon.rto=60000
 
   deploy-gcs:
